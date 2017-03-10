@@ -1,0 +1,59 @@
+
+	  //write database
+        
+		EEPROM_Write(0,1);
+		EEPROM_WRITE_STRING(1,(U8_t*)"BIKE:2300$");
+		EEPROM_Write(12,2);
+		EEPROM_WRITE_STRING(13,(U8_t*)"LCD:4000$");
+		EEPROM_Write(23,3);
+		EEPROM_WRITE_STRING(24,(U8_t*)"Charger:50$");
+		EEPROM_Write(36,4);
+		EEPROM_WRITE_STRING(37,(U8_t*)"Watch:28$");
+		EEPROM_Write(47,5);
+		EEPROM_WRITE_STRING(48,(U8_t*)"Ball:122$");//57
+        
+
+	  //get new data from barcode
+ 	   barcodeOld=barcodeNew;
+       barcodeNew=TB_getchar_notWait(barcodeNew);TbUart_Send_stri((U8_t*)"start");
+      //access the buffer for receving  new data from barcode
+       if(barcodeNew!=barcodeOld){
+          database[indexDatabase]=barcodeNew;
+          indexDatabase++;
+       }
+
+       
+       
+//get new data from barcode
+  if(system.flag==1){
+   barcodeOld=barcodeNew;
+   barcodeNew=TbUart_get_char();
+   barcodeNew=barcodeNew-'0';
+   system.flag=0;
+      }
+
+
+
+//search for barcode IDs
+ for(eeprom_address=0;eeprom_address<=57;eeprom_address++){
+    reading=EEPROM_Read(eeprom_address,1);
+    if(reading==barcodeNew){
+        EEPROM_READ_STRING((eeprom_address+1),1,(U8_t*)dataEEP);
+        while(1){
+        TbUart_Send_stri((U8_t*)dataEEP);
+        TbUart_Send_char('\n');
+        //get new data from barcode
+        barcodeOld=barcodeNew;
+        // barcodeNew=TB_getchar_notWait(barcodeNew);
+        barcodeNew=TbUart_get_char();
+        barcodeNew=barcodeNew-'0';
+        if(barcodeNew!=barcodeOld){
+        eeprom_address=255;
+        break;
+ 		        }//if
+                }break;//while(1)
+         }//if
+   }//for
+
+		}
+       
